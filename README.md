@@ -1,0 +1,1 @@
+This is simply control tool for HZDCoreTools CLI for easy one-click fullgame.prefetch.core rebuild for Horizon Zero Dawn mods. HZDCoreTools could be obtained here (souce code only): https://github.com/Nukem9/HZDCoreEditor and MUST be compiled and placed to HZDCoreTools folder near PrefetchTool.exe
