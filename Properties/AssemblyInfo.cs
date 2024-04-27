@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("PrefetchTool")]
+[assembly: AssemblyProduct("DSDCModInstaller")]
 [assembly: AssemblyCopyright("Copyright © Stealch 2024")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
