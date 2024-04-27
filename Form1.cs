@@ -16,7 +16,7 @@ namespace PrefetchTool
             string tool = Path.GetFullPath(@"HZDCoreTools\HZDCoreTools.exe"); // получаем полный путь до HZDCoreTools.exe
             string path = Path.GetFullPath(@"HZDCoreTools"); // получаем полный путь до папки HZDCoreTools
             string subpath = @"core_staging\prefetch"; // переменная для создания подпапок
-            
+                        
 
             if (!File.Exists(tool) || !Directory.Exists(path))
             {
@@ -46,6 +46,12 @@ namespace PrefetchTool
                     string _target = @"\*.bin";
                     string _targetFile = '\u0022' + _path2 + _target + '\u0022'; // заключаем путь до целевого файла в кавычки
                     string _output = @"\fullgame.prefetch.core";
+                    string _prefetch = @"\Patch_zzzzPrefetch.bin";
+                    string mustBeDeleted = _path2 + _prefetch;
+                        if (File.Exists(mustBeDeleted)) // Проверка наличия Patch_zzzzPrefetch.bin
+                        {
+                        File.Delete(mustBeDeleted); // Удаление Patch_zzzzPrefetch.bin если есть.
+                        };
 
                                                                                 // Первая стадия - создание fullgame.prefetch.core
                     Process process = new Process();
@@ -57,9 +63,8 @@ namespace PrefetchTool
                         process.WaitForExit();
                     };
                                                                                    // Вторая стадия - создяние бинарного архива
-                    string outBinary = @"\Patch_zzzzPrefetch.bin";
                     string coreFile = Path.GetFullPath(@"HZDCoreTools\core_staging\prefetch\fullgame.prefetch.core");
-                    string binaryFile = '\u0022' + _path2 + outBinary + '\u0022';
+                    string binaryFile = '\u0022' + _path2 + _prefetch + '\u0022';
                     string _remove = Path.GetFullPath(@"HZDCoreTools\core_staging");
                     Process process1 = new Process();
                     {
