@@ -45,8 +45,8 @@ namespace PrefetchTool
                     string _path2 = Path.GetDirectoryName(ofd.FileName); // получаем путь к папке игры из выбора
                     string _target = @"\*.bin";
                     string _targetFile = '\u0022' + _path2 + _target + '\u0022'; // заключаем путь до целевого файла в кавычки
-                    string _output = @"\fullgame.prefetch.core";
-                    string _prefetch = @"\Patch_zzzzPrefetch.bin";
+                    string _output = @"\fullgame.prefetch.core"; 
+                    string _prefetch = @"\Patch_zzzzPrefetch.bin"; // Конечный файл
                     string mustBeDeleted = _path2 + _prefetch;
                    
                         if (File.Exists(mustBeDeleted)) // Проверка наличия Patch_zzzzPrefetch.bin
