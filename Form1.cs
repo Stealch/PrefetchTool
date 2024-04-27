@@ -48,9 +48,24 @@ namespace PrefetchTool
                     string _output = @"\fullgame.prefetch.core";
                     string _prefetch = @"\Patch_zzzzPrefetch.bin";
                     string mustBeDeleted = _path2 + _prefetch;
+                   
                         if (File.Exists(mustBeDeleted)) // Проверка наличия Patch_zzzzPrefetch.bin
                         {
-                        File.Delete(mustBeDeleted); // Удаление Patch_zzzzPrefetch.bin если есть.
+                            DialogResult result = MessageBox.Show(
+                            "Existing Patch_zzzzPrefetch.bin will be permanently deleted! Do you wish to continue?",
+                            "Patch_zzzzPrefetch.bin already exist!",
+                            MessageBoxButtons.OKCancel,
+                            MessageBoxIcon.Exclamation,
+                            MessageBoxDefaultButton.Button1,
+                            MessageBoxOptions.DefaultDesktopOnly);
+                            if (result == DialogResult.OK)
+                            { 
+                            File.Delete(mustBeDeleted); // Удаление Patch_zzzzPrefetch.bin если есть.
+                            }
+                            else
+                            {
+                            return;
+                            };
                         };
 
                                                                                 // Первая стадия - создание fullgame.prefetch.core
