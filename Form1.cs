@@ -95,7 +95,7 @@ namespace PrefetchTool
                             MessageBoxIcon.Information,
                             MessageBoxDefaultButton.Button1,
                             MessageBoxOptions.DefaultDesktopOnly);
-                       
+
                         Directory.Delete(_remove, true);
                     };
                 }
