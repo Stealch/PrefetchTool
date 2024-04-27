@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.IO;
 using System.Windows.Forms;
-using Microsoft.Win32;
 
 namespace PrefetchTool
 {
@@ -17,6 +16,7 @@ namespace PrefetchTool
             string tool = Path.GetFullPath(@"HZDCoreTools\HZDCoreTools.exe"); // получаем полный путь до HZDCoreTools.exe
             string path = Path.GetFullPath(@"HZDCoreTools"); // получаем полный путь до папки HZDCoreTools
             string subpath = @"core_staging\prefetch"; // переменная для создания подпапок
+            
 
             if (!File.Exists(tool) || !Directory.Exists(path))
             {
@@ -33,7 +33,7 @@ namespace PrefetchTool
                 Directory.CreateDirectory($"{path}/{subpath}");
                 
                 string outputFile = Path.GetFullPath(@"HZDCoreTools\core_staging\prefetch");
-               // string currientToolCommand = tool + " " + "--horizonzerodawn ";
+
                 OpenFileDialog ofd = new OpenFileDialog
                 {
                     Title = "Pick any game archive from Packed_DX12 folder",
@@ -42,7 +42,6 @@ namespace PrefetchTool
                 };
                 if (ofd.ShowDialog() == DialogResult.OK)
                 {
-                    // string _path = '\u0022' + Path.GetDirectoryName(ofd.FileName) + '\u0022'; // получаем путь к папке игры из выбора и заключаем в кавычки
                     string _path2 = Path.GetDirectoryName(ofd.FileName); // получаем путь к папке игры из выбора
                     string _target = @"\*.bin";
                     string _targetFile = '\u0022' + _path2 + _target + '\u0022'; // заключаем путь до целевого файла в кавычки
@@ -61,6 +60,7 @@ namespace PrefetchTool
                     string outBinary = @"\Patch_zzzzPrefetch.bin";
                     string coreFile = Path.GetFullPath(@"HZDCoreTools\core_staging\prefetch\fullgame.prefetch.core");
                     string binaryFile = '\u0022' + _path2 + outBinary + '\u0022';
+                    string _remove = Path.GetFullPath(@"HZDCoreTools\core_staging");
                     Process process1 = new Process();
                     {
                         process1.StartInfo.FileName = tool; //путь к приложению, которое будем запускать
@@ -76,7 +76,7 @@ namespace PrefetchTool
                             MessageBoxDefaultButton.Button1,
                             MessageBoxOptions.DefaultDesktopOnly);
                        
-                        Directory.Delete(outputFile, true);
+                        Directory.Delete(_remove, true);
                     };
                 }
                 else
