@@ -101,7 +101,7 @@ namespace PrefetchTool
                 }
                 else
                 {
-
+                    return;
                 };
             }
         }
