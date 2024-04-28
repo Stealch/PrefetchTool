@@ -17,6 +17,11 @@ namespace PrefetchTool
             string tool = Path.GetFullPath(@"HZDCoreTools\HZDCoreTools.exe"); // получаем полный путь до HZDCoreTools.exe
             string path = Path.GetFullPath(@"HZDCoreTools"); // получаем полный путь до папки HZDCoreTools
             string subpath = @"core_staging\prefetch"; // переменная для создания подпапок
+            string _tempFolder = Path.GetFullPath(@"HZDCoreTools\core_staging"); // Получаем путь к временной папке, которая могла остаться от предыдущего запуска или предыдущего релиза
+            if (Directory.Exists(_tempFolder)) // Проверка наличия не нужной временной папки
+            {
+                Directory.Delete(_tempFolder, true); // Удаление временной папки если она по какой-то причине осталась от предыдущего запуска или предыдущего релиза
+            };
                         
 
             if (!File.Exists(tool) || !Directory.Exists(path))
@@ -84,29 +89,47 @@ namespace PrefetchTool
                         process.Start();
                         process.WaitForExit();
                     };
-                                                                                   // Вторая стадия - создяние бинарного архива
-                    string coreFile = Path.GetFullPath(@"HZDCoreTools\core_staging\prefetch\fullgame.prefetch.core");
-                    string binaryFile = '\u0022' + _path2 + _prefetch + '\u0022';
-                    Process process1 = new Process();
+                                                                                   // Вторая стадия - создание бинарного архива
+                    string coreFile = Path.GetFullPath(@"HZDCoreTools\core_staging\prefetch\fullgame.prefetch.core"); // Получаем полный путь к fullgame.prefetch.core
+                    if (!File.Exists(coreFile)) // Проверяем наличие сгенерированного fullgame.prefetch.core
                     {
-                        process1.StartInfo.FileName = tool; //путь к приложению, которое будем запускать
-                        process1.StartInfo.WorkingDirectory = Path.GetFullPath(@"HZDCoreTools"); //путь к рабочей директории приложения
-                        process1.StartInfo.Arguments = "--horizonzerodawn " + "pack " + "--input " + coreFile + " " + "--output " + binaryFile + " " + "--verbose"; //аргументы командной строки (параметры)
-                        process1.Start();
-                        process1.WaitForExit();
                         MessageBox.Show(
-                            "Rebuild complete!",
-                            "Success",
+                            "fullgame.prefetch.core missing or have incorrect path",
+                            "Error",
                             MessageBoxButtons.OK,
-                            MessageBoxIcon.Information,
+                            MessageBoxIcon.Error,
                             MessageBoxDefaultButton.Button1,
                             MessageBoxOptions.DefaultDesktopOnly);
-
                         Directory.Delete(_remove, true); // Удаление временной папки по завершению
-                        BtnRebuild.Enabled = true; // Включение кнопки
                         BtnRebuild.Text = "Rebuild!";
+                        BtnRebuild.Enabled = true; // Включение кнопки
                         return;
-                    };
+                    }
+                    else
+                    {
+                        string _coreFile = '\u0022' + coreFile + '\u0022'; // Заключаем путь к fullgame.prefetch.core в кавычки для обработки возможных экзотичных путей
+                        string binaryFile = '\u0022' + _path2 + _prefetch + '\u0022';
+                        Process process1 = new Process();
+                        {
+                            process1.StartInfo.FileName = tool; //путь к приложению, которое будем запускать
+                            process1.StartInfo.WorkingDirectory = Path.GetFullPath(@"HZDCoreTools"); //путь к рабочей директории приложения
+                            process1.StartInfo.Arguments = "--horizonzerodawn " + "pack " + "--input " + _coreFile + " " + "--output " + binaryFile + " " + "--verbose"; //аргументы командной строки (параметры)
+                            process1.Start();
+                            process1.WaitForExit();
+                            MessageBox.Show(
+                                "Rebuild complete!",
+                                "Success",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Information,
+                                MessageBoxDefaultButton.Button1,
+                                MessageBoxOptions.DefaultDesktopOnly);
+
+                            Directory.Delete(_remove, true); // Удаление временной папки по завершению
+                            BtnRebuild.Enabled = true; // Включение кнопки
+                            BtnRebuild.Text = "Rebuild!";
+                            return;
+                        };
+                    }
                 }
                 else
                 {
