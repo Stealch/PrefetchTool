@@ -5,7 +5,7 @@ using System.Windows.Forms;
 
 namespace PrefetchTool
 {
-
+    
     public partial class Form1 : Form
     {
         /// <summary>
@@ -15,21 +15,21 @@ namespace PrefetchTool
         {
             InitializeComponent();
         }
+        /// <summary>
+        /// БОЛЬШАЯ КНОПКА
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void BtnRebuild_Click(object sender, EventArgs e)
         {
-            //            BtnRebuild.Visible = false;
             BtnRebuild.Enabled = false; // Отключение кнопки после нажатия
             string tool = Path.GetFullPath(@"HZDCoreTools\HZDCoreTools.exe")?.ToString(); // получаем полный путь до HZDCoreTools.exe
-            string path = Path.GetFullPath(@"HZDCoreTools")?.ToString(); // получаем полный путь до папки HZDCoreTools
+            string tempName = Guid.NewGuid().ToString(); // Создание уникального имени
+            string path = Path.Combine(Path.GetTempPath(), tempName); // Путь к временной папке с уникальным именем
             string subpath = @"core_staging\prefetch"; // переменная для создания подпапок
-            string _tempFolder = Path.GetFullPath(@"HZDCoreTools\core_staging")?.ToString(); // Получаем путь к временной папке, которая могла остаться от предыдущего запуска или предыдущего релиза
-            if (Directory.Exists(_tempFolder)) // Проверка наличия не нужной временной папки
-            {
-                Directory.Delete(_tempFolder, true); // Удаление временной папки если она по какой-то причине осталась от предыдущего запуска или предыдущего релиза
-            };
-
-
-            if (File.Exists(tool) && Directory.Exists(path))
+            Directory.CreateDirectory($"{path}/{subpath}"); // Создание временной папки и подпапки
+            
+            if (File.Exists(tool))
             {
                 OpenFileDialog ofd = new OpenFileDialog
                 {
@@ -40,21 +40,20 @@ namespace PrefetchTool
 
                 if (ofd.ShowDialog() == DialogResult.OK) // Выбор файла: Нажата кнопка ОК и защита от дурака не сработала
                 {
-
-                    Directory.CreateDirectory($"{path}/{subpath}"); // Создание временной папки и подпапки
                     string _path2 = Path.GetDirectoryName(ofd.FileName); // Получаем путь к папке игры из выбора
-                    string _Initial = $"{_path2}{@"\Initial.bin"}"; // Защита от дурака
-                    string outputFile = Path.GetFullPath(@"HZDCoreTools\core_staging\prefetch");
-                    string _target = @"\*.bin";
-                    string _targetFile = '\u0022' + _path2 + _target + '\u0022'; // заключаем путь до целевого файла в кавычки
-                    string _output = @"\fullgame.prefetch.core";
-                    string _prefetch = @"\Patch_zzzzPrefetch.bin"; // Конечный файл
-                    string mustBeDeleted = _path2 + _prefetch;
-                    string workDir = Path.GetFullPath(@"HZDCoreTools\"); //путь к рабочей директории приложения
-                    if (File.Exists(_Initial) && Directory.Exists(_path2) && Directory.Exists(outputFile)) // Защита от дурака не сработала
+                    string _Initial = Path.Combine(_path2, "Initial.bin"); // Защита от дурака
+                    string outputPath = Path.Combine(path, subpath); // Путь к временной папке
+                    string _target = Path.Combine(_path2, "*.bin");
+                    string targetFile = '\u0022' + _target + '\u0022'; // аргумент --input
+                    string _output = Path.Combine(outputPath, "fullgame.prefetch.core");
+                    string output = '\u0022' + _output + '\u0022'; // аргумент --output
+                    string _binaryFile = Path.Combine(_path2, "Patch_zzzzPrefetch.bin"); // Конечный файл (абсолютный путь)
+                    string workDir = Path.Combine(path, @"\"); //путь к временной рабочей директории приложения
+                    string rebuilded = Path.Combine(path, @"core_staging\*.*");
+                    if (File.Exists(_Initial) && Directory.Exists(_path2) && Directory.Exists(outputPath)) // Защита от дурака не сработала
                     {
 
-                        if (File.Exists(mustBeDeleted)) // Проверка наличия Patch_zzzzPrefetch.bin
+                        if (File.Exists(_binaryFile)) // Проверка наличия Patch_zzzzPrefetch.bin
                         {
                             DialogResult result = MessageBox.Show(
                             "Existing Patch_zzzzPrefetch.bin will be permanently deleted! Do you wish to continue?",
@@ -65,11 +64,11 @@ namespace PrefetchTool
                             MessageBoxOptions.DefaultDesktopOnly);
                             if (result == DialogResult.OK)
                             {
-                                File.Delete(mustBeDeleted); // Удаление Patch_zzzzPrefetch.bin если есть.
+                                File.Delete(_binaryFile); // Удаление Patch_zzzzPrefetch.bin если есть.
                             }
                             else
                             {
-                                Directory.Delete(_tempFolder, true);
+                                Directory.Delete(path, true);
                                 BtnRebuild.Enabled = true; // Включение кнопки
                                 return;
                             };
@@ -78,29 +77,28 @@ namespace PrefetchTool
                         // Первая стадия - создание fullgame.prefetch.core
 
                         BtnRebuild.Text = "Rebuilding..."; // Меняем текст на кнопке
-                        string _args = $"--horizonzerodawn rebuildprefetch --input {_targetFile} --output {outputFile}{_output} --patchesonly --verbose"; //аргументы командной строки (параметры)
+                        string _args = $"--horizonzerodawn rebuildprefetch --input {targetFile} --output {output} --patchesonly --verbose"; //аргументы командной строки (параметры)
                         Execute ex = new Execute();
                         ex.Start(tool, workDir, _args);
+
                         // Вторая стадия - создание бинарного архива
-                        string _prefetchTMP = Path.GetFullPath(@"HZDCoreTools\core_staging\prefetch\fullgame.prefetch.core");
-                        if (File.Exists(_prefetchTMP)) // Проверяем наличие сгенерированного fullgame.prefetch.core
+                        
+                        if (File.Exists(_output)) // Проверяем наличие сгенерированного fullgame.prefetch.core
                         {
-                            string coreFile = Path.Combine(Path.GetFullPath(@"HZDCoreTools\core_staging"), "*.*"); // Получаем полный путь к fullgame.prefetch.core
-                            string _coreFile = '\u0022' + coreFile + '\u0022'; // Заключаем путь к fullgame.prefetch.core в кавычки для обработки возможных экзотичных путей
-                            string binaryFile = '\u0022' + _path2 + _prefetch + '\u0022';
-                            string args = $"--horizonzerodawn pack --input {_coreFile} --output {binaryFile} --verbose"; //аргументы командной строки (параметры)
+                            string coreFile = '\u0022' + rebuilded + '\u0022'; // Аргуиент --input второй стадии (для запаковки fullgame.prefetch.core)
+                            string binaryFile = '\u0022' + _binaryFile + '\u0022'; // Аргумент --output второй стадии (Patch_zzzzPrefetch.bin)
+                            string args = $"--horizonzerodawn pack --input {coreFile} --output {binaryFile} --verbose"; //аргументы командной строки (параметры)
                             Execute _ex = new Execute();
                             _ex.Start(tool, workDir, args);
+                            BtnRebuild.Text = "Done!"; // Готово
                             MessageBox.Show(
-                            $"{binaryFile} successfully created.",
+                            $"{_binaryFile} successfully created.",
                             $"Done!",
                             MessageBoxButtons.OK,
                             MessageBoxIcon.Information,
                             MessageBoxDefaultButton.Button1,
                             MessageBoxOptions.DefaultDesktopOnly);
-                            Directory.Delete(_tempFolder, true); // Удаление временной папки по завершению
-                            BtnRebuild.Enabled = true; // Включение кнопки
-                            BtnRebuild.Text = "Rebuild!"; // Возвращаем текст на кнопке по умолчанию
+                            Directory.Delete(path, true); // Удаление временной папки по завершению
                             Application.Exit();
                         }
                         else
@@ -112,7 +110,7 @@ namespace PrefetchTool
                                 MessageBoxIcon.Error,
                                 MessageBoxDefaultButton.Button1,
                                 MessageBoxOptions.DefaultDesktopOnly);
-                            Directory.Delete(_tempFolder, true); // Удаление временной папки при ошибке
+                            Directory.Delete(path, true); // Удаление временной папки при ошибке
                             BtnRebuild.Text = "Rebuild!"; // Возвращаем текст на кнопке по умолчанию
                             BtnRebuild.Enabled = true; // Включение кнопки
                             return;
@@ -127,7 +125,7 @@ namespace PrefetchTool
                             MessageBoxIcon.Error,
                             MessageBoxDefaultButton.Button1,
                             MessageBoxOptions.DefaultDesktopOnly);
-                        Directory.Delete(_tempFolder, true); // Удаление временной папки при ошибке
+                        Directory.Delete(path, true); // Удаление временной папки при ошибке
                         BtnRebuild.Text = "Rebuild!"; // Возвращаем текст на кнопке по умолчанию
                         BtnRebuild.Enabled = true; // Включение кнопки
                         return;
@@ -135,6 +133,7 @@ namespace PrefetchTool
                 }
                 else // Выбор файла: Нажата кнопка отмены или сработала защита от дурака
                 {
+                    Directory.Delete(path, true); // Удаление временной папки
                     BtnRebuild.Enabled = true; // Включение кнопки
                     return;
                 };
@@ -148,8 +147,8 @@ namespace PrefetchTool
                     MessageBoxIcon.Error,
                     MessageBoxDefaultButton.Button1,
                     MessageBoxOptions.DefaultDesktopOnly);
-                BtnRebuild.Enabled = true; // Включение кнопки
-                return;
+                Directory.Delete(path, true);
+                Application.Exit();
             }
         }
 
@@ -178,7 +177,7 @@ namespace PrefetchTool
             }
             catch (Exception e)
             {
-                //               string errlog = $"errlog_{DateTime.Now:yyyyMMdd_HHmmss}.txt";
+ //               string errlog = $"errlog_{DateTime.Now:yyyyMMdd_HHmmss}.txt";
 
                 MessageBox.Show(
                     $"Exception in Execute function! Reason: {e.Message}",

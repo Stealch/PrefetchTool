@@ -35,6 +35,7 @@ namespace PrefetchTool
             // 
             // BtnRebuild
             // 
+            this.BtnRebuild.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.BtnRebuild.Location = new System.Drawing.Point(36, 32);
             this.BtnRebuild.Name = "BtnRebuild";
             this.BtnRebuild.Size = new System.Drawing.Size(209, 109);
